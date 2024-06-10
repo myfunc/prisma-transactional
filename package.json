@@ -1,0 +1,44 @@
+{
+  "name": "@myfunc/prisma-transactional",
+  "version": "0.1.0",
+  "author": "myfunc",
+  "description": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myfunc/prisma-transactional.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "prisma",
+    "@prisma/client",
+    "nest",
+    "nestjs",
+    "extension",
+    "transactional",
+    "transaction",
+    "prisma-transactional",
+    "prisma-transaction"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "@prisma/client": ">=5.0.0",
+    "nestjs-cls": "^4.3.0"
+  },
+  "devDependencies": {
+    "@prisma/client": ">=5.0.0",
+    "@types/node": "^20.12.11",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-local": "^4.2.2",
+    "prisma": "latest",
+    "typescript": "4.9.4"
+  }
+}
