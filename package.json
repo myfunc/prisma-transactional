@@ -2,7 +2,7 @@
   "name": "@myfunc/prisma-transactional",
   "version": "0.1.0",
   "author": "myfunc",
-  "description": "",
+  "description": "Decorator that wraps all prisma queries along the whole call stack to a single transaction.",
   "license": "MIT",
   "repository": {
     "type": "git",
