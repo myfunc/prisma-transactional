@@ -1,6 +1,6 @@
 # Prisma Transactional
 
-Package contains @PrismaTransactional decorator that wraps all prisma queries to a single transaction. In case of overlapping several transactions they will be merged.
+Package contains @PrismaTransactional decorator that wraps all prisma queries along **the whole call stack** to a single transaction. In case of overlapping several transactions they will be merged.
 
 **Use in production at your own risk.**
 A decorator is being actively used on production environment with no issues, but I strictly recommend to wait for a stable release. 
