@@ -38,7 +38,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 Now you can use `PrismaTransactional`.
 
 ### Run example
-In [Example application](./example/index.ts) described all possible decorator's use cases.
+In [Example application](./examples/nest/index.ts) described all possible decorator's use cases.
 For running example app, please add .env file and provide DB connection string.
 
 ```bash
