@@ -1,33 +1,37 @@
-# Prisma Transactional
+# @myfunc/prisma-transactional
 
 Package contains @PrismaTransactional decorator that wraps all prisma queries along **the whole call stack** to a single transaction. In case of overlapping several transactions they will be merged.
 
 **Use in production at your own risk.**
 A decorator is being actively used on production environment with no issues, but I strictly recommend to wait for a stable release. 
 
-
-### How to setup in NestJS application
-
-Install a package
+### Installation
 ```bash
 npm i @myfunc/prisma-transactional
 ```
 
+### Universal setup in node.js application
+
+```typescript
+import { PrismaClient } from '@prisma/client';
+import { patchPrismaTx } from '@myfunc/prisma-transactional';
+
+const prisma = patchPrismaTx(new PrismaClient());
+```
+
+### How to setup in NestJS application
+
 Patch your PrismaClient with `patchPrismaTx(client, config)`
-```tsx
-import { patchPrismaTx } from '@myfunc/prisma-transactional'; // Import
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+```typescript
+import { patchPrismaTx } from '@myfunc/prisma-transactional';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     super();
-    // Patch and return the substituted version.
-    return patchPrismaTx(this, {
-      enableLogging: true,
-      customLogger: Logger,
-    });
+    return patchPrismaTx(this);
   }
 
   async onModuleInit() {
@@ -38,7 +42,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 Now you can use `PrismaTransactional`.
 
 ### Run example
-In [Example application](./examples/nest/index.ts) described all possible decorator's use cases.
+In [Example application](./examples/express/index.ts) described all possible decorator's use cases.
 For running example app, please add .env file and provide DB connection string.
 
 ```bash
@@ -56,10 +60,13 @@ On any unhandled error all changed will be rolled back.
 
 Example
 
-```tsx
+```typescript
+export class BalanceService { 
+  constructor(private prisma: PrismaService) {}
+
   // Now all queries (including nested queries in methods) will be executed in transaction
   @PrismaTransactional() 
-  private async addPoints(userId: string, amount: number) {
+  async addPoints(userId: string, amount: number) {
     const { balance } = await this.getBalance(userId);
     const newBalance = await this.prisma.user.update({
       select: {
@@ -72,11 +79,25 @@ Example
       newBalance
     };
   }
+
+  async getBalance(userId: string) {
+    // Query will be wrapped in transaction if called by addPoints() method.
+    const { balance } = await this.prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            balance: true
+        }
+    });
+    return balance;
+  }
+}
 ```
 
 To handle success commit you can put the following code anywhere in the code. If there is no transaction, a callback will be executed immediately.
 
-```tsx
+```typescript
 PrismaTransactional.onSuccess(() => {
   this.notifyBalanceUpdated(balance!, args._notificationDelay);
 });
@@ -85,15 +106,14 @@ PrismaTransactional.onSuccess(() => {
 Also, you can add many callbacks. All callbacks are stored in a stack under the hood.
 
 You can execute all in transaction with no decorator.
-
-```tsx
-PrismaTransactional.execute(async () => {
+```typescript
+await PrismaTransactional.execute(async () => {
   await this.prisma.users.findMany({});
   await this.prisma.users.deleteMany({});
 });
 ```
-or
-```tsx
+Or return a result from a success execution.
+```typescript
 const result = await PrismaTransactional.execute(async () => {
   const result = await this.prisma.users.findMany({});
   await this.prisma.users.deleteMany({});
@@ -102,7 +122,12 @@ const result = await PrismaTransactional.execute(async () => {
 ```
 
 ## Plans
-- [ ] Get rid of hardcoded values and make them configurable. "TRANSACTION_TIMEOUT"
-- [ ] Implement ESLint rule for nested prisma queries that might be unintentionally executed in transaction. That means a developer will be aknowledged about possible transaction wrapping and force him to add an eslint-ignore comment.
+
+- [ ] Add `PrismaTransactional.executeIsolated` method for running queries out of transaction context.
 - [ ] Add tests.
-- [ ] Add express.js examples.
+- [x] Add express.js example.
+- [ ] Add nestjs example.
+- [ ] Get rid of hardcoded values and make them configurable. "TRANSACTION_TIMEOUT"
+- [ ] Safety improvements. As an idea - implement ESLint rule for nested prisma queries that might be unintentionally executed in transaction. That means a developer will be aknowledged about possible transaction wrapping and force him to add an eslint-ignore comment.
+- [ ] Clean code.
+

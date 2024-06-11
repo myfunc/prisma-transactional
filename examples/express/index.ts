@@ -1,6 +1,5 @@
 import { Post, Prisma, PrismaClient } from '@prisma/client';
 import { patchPrismaTx, PrismaTransactional } from '../../src';
-import { clear } from 'console';
 
 // Init prisma client
 const rawPrisma = new PrismaClient({
@@ -183,6 +182,7 @@ async function main() {
   if (throwError.length !== 0) {
     console.error('throwError page.length !== 0');
   }
+  await resetDB();
 }
 
 main();
