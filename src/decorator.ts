@@ -57,3 +57,12 @@ PrismaTransactional.execute = <T>(
     );
   }
 };
+
+// Run callback with isolated PrismaClient with no transaction.
+// Only for parameter prismaClient, if other client will be used it will be executed in transaction if exists
+PrismaTransactional.executeIsolated = <T>(
+  callback: (prismaClient: PrismaClient) => Promise<T>,
+): Promise<T> => {
+  const prismaRoot = Manager.prismaClient['$root'] as PrismaClient;
+  return callback(prismaRoot);
+};

@@ -43,7 +43,7 @@ Now you can use `PrismaTransactional`.
 
 ### Run example
 In [Example application](./examples/express/index.ts) described all possible decorator's use cases.
-For running example app, please add .env file and provide DB connection string.
+For running example app, please edit DB connection string in the .env file.
 
 ```bash
 npm i
@@ -121,9 +121,33 @@ const result = await PrismaTransactional.execute(async () => {
 });
 ```
 
+Execute a query out of current transaction context.
+```typescript
+@PrismaTransactional() 
+  async addPoints(userId: string, amount: number) {
+    const { balance } = await this.getBalance(userId);
+
+    // userLog item will be created even if current transaction will be rolled back.
+    await PrismaTransactional.executeIsolated(async () => {
+      await this.prisma.userLog.create({ note: `Attempt to add balance for user ${userId} with balance ${balance}`});
+    });
+
+    const newBalance = await this.prisma.user.update({
+      select: {
+        balance: true,
+      },
+      where: { id: userId },
+      data: { balance: roundBalance(balance + amount) },
+    });
+    return {
+      newBalance
+    };
+  }
+```
+
 ## Plans
 
-- [ ] Add `PrismaTransactional.executeIsolated` method for running queries out of transaction context.
+- [x] Add `PrismaTransactional.executeIsolated` method for running queries out of transaction context.
 - [ ] Add tests.
 - [x] Add express.js example.
 - [ ] Add nestjs example.

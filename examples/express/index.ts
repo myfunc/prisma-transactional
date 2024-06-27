@@ -109,7 +109,7 @@ class PostService {
       console.log('txCreate5RandomWait5SecAndSummarize PrismaTransactional.onSuccess');
     });
     await this.postRepository.createRandomPosts(5);
-    await WaitAsync(5000);
+    await WaitAsync(500);
     await this.readAllPostsAndCreateOneMerged();
 
     return await this.postRepository.readPosts({});
@@ -122,7 +122,21 @@ class PostService {
     });
     const posts = await this.postRepository.createRandomPosts(30);
     await this.postRepository.editPost(posts[0].id, 'edited');
-    await WaitAsync(1000);
+    await WaitAsync(100);
+
+    this.throwError();
+  }
+
+  @PrismaTransactional()
+  async txCreate5PostsAnd1PostIsolatedAndThrow() {
+    PrismaTransactional.onSuccess(async () => {
+      console.log('txCreate30PostsAndThrow PrismaTransactional.onSuccess');
+    });
+    await this.postRepository.createPost({ title: 'Not existing post' });
+    await PrismaTransactional.executeIsolated(async (client: PrismaClient) => {
+      await client.post.create({ data: { title: 'Isolated post' } });
+    });
+    await WaitAsync(100);
 
     this.throwError();
   }
@@ -133,7 +147,7 @@ class PostService {
     });
 
     const posts = await this.postRepository.readPosts({});
-    await WaitAsync(2500);
+    await WaitAsync(250);
 
     return await this.postRepository.createPost({
       title: 'New txReadAllPostsAndCreateOneMerged post',
@@ -159,28 +173,42 @@ async function main() {
     return postRepository.readPosts({});
   };
 
+  const testErrorWithIsolatedAction = async () => {
+    try {
+      await postService.txCreate5PostsAnd1PostIsolatedAndThrow();
+    } catch {}
+    return postRepository.readPosts({
+      where: { OR: [{ title: 'Not existing post' }, { title: 'Isolated post' }] },
+    });
+  };
+
   const test1Promise = postService.txCreate5RandomWait5SecAndSummarize();
-  const testErrorPromise = testErrorAction();
-  await WaitAsync(200);
+  const test1Error = await testErrorAction();
+
+  await WaitAsync(20);
   const test2 = await PrismaTransactional.execute(
     async () => await postService.txReadAllPostsAndCreateOneWithCount(),
   );
   const test1 = await test1Promise;
   const test3 = await postService.deleteAllAndCreateOnePost();
-  const throwError = await testErrorPromise;
 
-  console.log({ test1, test2, test3, throwError });
+  const test2Error = await testErrorWithIsolatedAction();
+
+  console.log({ test1, test2, test3, test1Error, test2Error });
   if (test1.length !== 7) {
-    console.error('test1.length !== 7');
+    console.error('FAILED: test1.length !== 7');
   }
   if (test2.content !== 'Count: 0') {
-    console.error('test2.content !== 0');
+    console.error('FAILED: test2.content !== 0');
   }
   if (test3.title !== 'New deleteAllAndCreateOnePost post') {
-    console.error('test3.content is not correct');
+    console.error('FAILED: test3.content is not correct');
   }
-  if (throwError.length !== 0) {
-    console.error('throwError page.length !== 0');
+  if (test1Error.length !== 0) {
+    console.error('FAILED: test1Error page.length !== 0');
+  }
+  if (test2Error.length !== 1) {
+    console.error('FAILED: test2Error isolated transaction wasnt executed');
   }
   await resetDB();
 }
