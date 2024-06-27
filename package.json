@@ -1,6 +1,6 @@
 {
   "name": "@myfunc/prisma-transactional",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "myfunc",
   "description": "Decorator that wraps all prisma queries along the whole call stack to a single transaction.",
   "license": "MIT",

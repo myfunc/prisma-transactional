@@ -133,10 +133,10 @@ class PostService {
       console.log('txCreate30PostsAndThrow PrismaTransactional.onSuccess');
     });
     await this.postRepository.createPost({ title: 'Not existing post' });
-    await PrismaTransactional.executeIsolated(async (client: PrismaClient) => {
-      await client.post.create({ data: { title: 'Isolated post' } });
-    });
+    await PrismaTransactional.prismaRoot.post.create({ data: { title: 'Isolated post' } });
     await WaitAsync(100);
+
+    PrismaTransactional;
 
     this.throwError();
   }

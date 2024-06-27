@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client/extension';
+import { PrismaClient } from '@prisma/client';
 import { ClsService, ClsServiceManager } from 'nestjs-cls';
 import { TX_CLIENT_KEY, TRANSACTION_TIMEOUT, TX_CLIENT_SUCCESS_CALLBACKS } from './const';
 import { Manager } from './manager';
@@ -25,7 +25,7 @@ export function PrismaTransactional(isolationLevel?: string): MethodDecorator {
 }
 
 // Utility to manage success callback queue
-PrismaTransactional.onSuccess = (callback: () => void | Promise<void>) => {
+PrismaTransactional.onSuccess = <T>(callback: () => T | Promise<T>): T | Promise<T> | undefined => {
   const clsService = ClsServiceManager.getClsService();
   const isActiveTransaction = clsService.get(TX_CLIENT_KEY);
 
@@ -58,11 +58,10 @@ PrismaTransactional.execute = <T>(
   }
 };
 
-// Run callback with isolated PrismaClient with no transaction.
-// Only for parameter prismaClient, if other client will be used it will be executed in transaction if exists
-PrismaTransactional.executeIsolated = <T>(
-  callback: (prismaClient: PrismaClient) => Promise<T>,
-): Promise<T> => {
-  const prismaRoot = Manager.prismaClient['$root'] as PrismaClient;
-  return callback(prismaRoot);
-};
+PrismaTransactional.prismaRoot = null as unknown as PrismaClient;
+// Run query with no transaction even if it exists.
+Object.defineProperty(PrismaTransactional, 'prismaRoot', {
+  get(): PrismaClient {
+    return Manager.prismaClient['$root'] as PrismaClient;
+  },
+});

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client/extension';
+import { PrismaClient } from '@prisma/client';
 import { ILoggerService, PrismaTransactionalConfig } from './type';
 import { ConsoleLogger } from './logger/console-logger';
 import { EmptyLogger } from './logger/empty-logger';

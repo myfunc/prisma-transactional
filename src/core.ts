@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client/extension';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { ClsService, ClsServiceManager } from 'nestjs-cls';
 import { TX_CLIENT_KEY, TX_CLIENT_SUCCESS_CALLBACKS } from './const';
 import { Manager } from './manager';
