@@ -128,8 +128,8 @@ Execute a query out of current transaction context.
     const { balance } = await this.getBalance(userId);
 
     // userLog item will be created even if current transaction will be rolled back.
-    await PrismaTransactional.executeIsolated(async () => {
-      await this.prisma.userLog.create({ note: `Attempt to add balance for user ${userId} with balance ${balance}`});
+    await PrismaTransactional.executeIsolated(async (rootClient: PrismaClient) => {
+      await rootClient.userLog.create({ note: `Attempt to add balance for user ${userId} with balance ${balance}`});
     });
 
     const newBalance = await this.prisma.user.update({
