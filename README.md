@@ -149,7 +149,7 @@ Execute a query out of current transaction context.
 
 ## Plans
 
-- [x] Add `PrismaTransactional.prismaRoot` method for running queries out of transaction context.
+- [x] Add `PrismaTransactional.prismaRoot` that returns root prisma client for running queries out of transaction context.
 - [ ] Add tests.
 - [x] Add express.js example.
 - [ ] Add nestjs example.
