@@ -1,4 +1,6 @@
 # @myfunc/prisma-transactional
+[![npm version](https://img.shields.io/npm/v/@myfunc/prisma-transactional.svg)](https://www.npmjs.com/package/@myfunc/prisma-transactional)
+[![downloads](https://img.shields.io/npm/dm/@myfunc/prisma-transactional.svg)](https://www.npmjs.com/package/@myfunc/prisma-transactional)
 
 Package contains @PrismaTransactional decorator that wraps all prisma queries along **the whole call stack** to a single transaction. In case of overlapping several transactions they will be merged.
 
