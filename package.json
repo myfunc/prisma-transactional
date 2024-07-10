@@ -25,7 +25,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "postpublish": "sh ./snyk.monitor.sh"
   },
   "peerDependencies": {
     "@prisma/client": ">=5.0.0",
